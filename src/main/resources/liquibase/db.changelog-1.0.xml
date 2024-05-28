@@ -42,6 +42,16 @@
                 <constraints nullable="false"/>
             </column>
 
+            <column name="failed_attempt" type="INT" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="lock_time" type="TIMESTAMP" defaultValue="CURRENT_TIMESTAMP()">
+                <constraints nullable="false"/>
+            </column>
+
+
+
         </createTable>
     </changeSet>
 
@@ -107,5 +117,14 @@
         <insert tableName="roles">
             <column name="name" value="ROLE_ADMIN"/>
         </insert>
+
+        <insert tableName="roles">
+            <column name="name" value="ROLE_MODERATOR"/>
+        </insert>
+
+        <insert tableName="roles">
+            <column name="name" value="ROLE_SUPER_ADMIN"/>
+        </insert>
+
     </changeSet>
 </databaseChangeLog>

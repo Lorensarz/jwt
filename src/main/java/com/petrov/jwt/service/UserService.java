@@ -18,4 +18,12 @@ public interface UserService {
     User findById(Long id);
 
     void delete(Long id);
+
+    void increaseFailedAttempts(User user);
+
+    void resetFailedAttempts(String username);
+
+    void lock(User user);
+
+    boolean unlockWhenTimeExpired(User user);
 }

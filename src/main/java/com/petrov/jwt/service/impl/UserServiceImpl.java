@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -20,6 +21,7 @@ import java.util.List;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
+    private static final long LOCK_TIME_DURATION = 5000;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -81,5 +83,43 @@ public class UserServiceImpl implements UserService {
     public void delete(Long id) {
         userRepository.deleteById(id);
         log.info("IN delete - user with id: {} successfully deleted", id);
+    }
+
+    @Override
+    public void increaseFailedAttempts(User user) {
+        int newFailAttempts = user.getFailedAttempt() + 1;
+        user.setFailedAttempt(newFailAttempts);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void resetFailedAttempts(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user.getFailedAttempt() > 0) {
+            user.setFailedAttempt(0);
+            userRepository.save(user);
+        }
+    }
+
+    @Override
+    public void lock(User user) {
+        user.setLockTime(new Date());
+        userRepository.save(user);
+    }
+
+    @Override
+    public boolean unlockWhenTimeExpired(User user) {
+        long lockTimeInMillis = user.getLockTime().getTime();
+        long currentTimeInMillis = System.currentTimeMillis();
+
+        if (lockTimeInMillis + LOCK_TIME_DURATION < currentTimeInMillis) {
+            user.setFailedAttempt(0);
+            user.setLockTime(null);
+            userRepository.save(user);
+
+            return true;
+        }
+
+        return false;
     }
 }
